@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Big Talk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1a1a2e;
+      --navy-light: #16213e;
+      --coral: #e94560;
+      --coral-light: #ff6b81;
+      --white: #ffffff;
+      --gray: #a0aec0;
+      --card-bg: rgba(255,255,255,0.06);
+      --card-border: rgba(255,255,255,0.1);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── SCREENS ─────────────────────────────────────────── */
+    .screen {
+      display: none;
+      min-height: 100vh;
+      padding: 24px 20px 40px;
+      max-width: 480px;
+      margin: 0 auto;
+      animation: fadeIn .35s ease;
+    }
+    .screen.active { display: flex; flex-direction: column; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── BLOBS (Screen 1 only) ───────────────────────────── */
+    .blobs {
+      position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .35;
+      animation: float 12s ease-in-out infinite alternate;
+    }
+    .blob-1 { width: 340px; height: 340px; background: var(--coral); top: -80px; left: -80px; animation-duration: 14s; }
+    .blob-2 { width: 280px; height: 280px; background: #6c63ff; bottom: 40px; right: -60px; animation-duration: 10s; animation-delay: -4s; }
+    .blob-3 { width: 220px; height: 220px; background: #0f3460; top: 45%; left: 30%; animation-duration: 16s; animation-delay: -8s; }
+
+    @keyframes float {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(30px, 40px) scale(1.08); }
+    }
+
+    /* ── SHARED COMPONENTS ───────────────────────────────── */
+    h1 { font-family: 'Space Grotesk', sans-serif; }
+
+    .btn {
+      display: block; width: 100%; padding: 16px;
+      background: var(--coral); color: var(--white);
+      border: none; border-radius: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.05rem; font-weight: 700;
+      cursor: pointer; transition: transform .15s, box-shadow .15s, background .15s;
+      letter-spacing: .3px;
+    }
+    .btn:hover  { background: var(--coral-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(233,69,96,.4); }
+    .btn:active { transform: translateY(0); }
+    .btn.secondary {
+      background: transparent; border: 2px solid var(--card-border);
+      color: var(--gray);
+    }
+    .btn.secondary:hover { border-color: var(--coral); color: var(--coral); background: transparent; box-shadow: none; }
+
+    input, textarea {
+      width: 100%; background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px; padding: 14px 16px;
+      color: var(--white); font-family: 'Inter', sans-serif;
+      font-size: .95rem; outline: none;
+      transition: border-color .2s;
+      resize: none;
+    }
+    input::placeholder, textarea::placeholder { color: var(--gray); }
+    input:focus, textarea:focus { border-color: var(--coral); }
+
+    label {
+      display: block; font-size: .78rem; font-weight: 600;
+      letter-spacing: .8px; text-transform: uppercase;
+      color: var(--gray); margin-bottom: 6px;
+    }
+
+    .field { margin-bottom: 18px; }
+
+    .chip {
+      display: inline-block; padding: 4px 10px;
+      background: rgba(233,69,96,.18); color: var(--coral-light);
+      border-radius: 20px; font-size: .75rem; font-weight: 600;
+      margin: 3px 3px 3px 0;
+    }
+
+    .room-badge {
+      display: inline-block; padding: 4px 14px;
+      background: rgba(233,69,96,.15); border: 1px solid rgba(233,69,96,.3);
+      border-radius: 20px; color: var(--coral); font-size: .82rem;
+      font-weight: 700; letter-spacing: 1px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* ── SCREEN 1: LANDING ───────────────────────────────── */
+    #s1 {
+      justify-content: center; align-items: center;
+      text-align: center; gap: 0; position: relative; z-index: 1;
+    }
+    #s1 .logo { font-size: 4rem; font-weight: 800; line-height: 1; margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff 40%, var(--coral)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    #s1 .tagline { color: var(--gray); font-size: 1rem; margin-bottom: 48px; font-style: italic; }
+    #s1 .landing-form { width: 100%; }
+    #s1 .landing-form input { font-size: 1.1rem; text-align: center; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+    #s1 .hint { font-size: .78rem; color: var(--gray); margin-top: 12px; }
+
+    /* ── SCREEN 2: PROFILE ───────────────────────────────── */
+    #s2 .s2-header { margin-bottom: 28px; }
+    #s2 .s2-header h1 { font-size: 1.6rem; margin-bottom: 6px; }
+    #s2 .s2-header p  { color: var(--gray); font-size: .9rem; }
+    .scroll-form { flex: 1; overflow-y: auto; }
+
+    /* ── SCREEN 3: ROOM ──────────────────────────────────── */
+    #s3 .room-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
+    #s3 .room-header h1 { font-size: 1.5rem; }
+    .people-grid { display: flex; flex-direction: column; gap: 14px; flex: 1; overflow-y: auto; }
+
+    .person-card {
+      background: var(--card-bg); border: 1.5px solid var(--card-border);
+      border-radius: 16px; padding: 18px;
+      cursor: pointer; transition: border-color .2s, transform .15s, box-shadow .15s;
+    }
+    .person-card:hover { border-color: var(--coral); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(233,69,96,.2); }
+    .person-card.mine {
+      border-color: rgba(233,69,96,.5); background: rgba(233,69,96,.08);
+      cursor: default;
+    }
+    .person-card.mine:hover { transform: none; box-shadow: none; }
+    .card-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .you-tag { font-size: .65rem; background: var(--coral); color: #fff; border-radius: 6px; padding: 2px 6px; font-weight: 700; letter-spacing: .5px; }
+    .card-chips { display: flex; flex-wrap: wrap; }
+
+    #s3 .bottom-actions { margin-top: 20px; display: flex; gap: 10px; }
+
+    /* ── SCREEN 4: MATCH REVEAL ──────────────────────────── */
+    #s4 { gap: 0; }
+    .match-header { text-align: center; padding: 20px 0 16px; }
+    .match-names { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 6px; }
+    .match-names span { color: var(--coral); }
+    .vibe-score-wrap { margin: 10px auto 24px; text-align: center; }
+    .vibe-label { font-size: .75rem; letter-spacing: 1.2px; text-transform: uppercase; color: var(--gray); margin-bottom: 4px; }
+    .vibe-number {
+      font-family: 'Space Grotesk', sans-serif; font-size: 5rem; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, var(--coral), #ff9a56);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .connections-list { display: flex; flex-direction: column; gap: 14px; flex: 1; overflow-y: auto; padding-bottom: 8px; }
+
+    .connection-card {
+      background: var(--card-bg); border: 1.5px solid var(--card-border);
+      border-radius: 16px; padding: 18px;
+      opacity: 0; transform: translateY(24px);
+      transition: opacity .45s ease, transform .45s ease;
+    }
+    .connection-card.visible { opacity: 1; transform: translateY(0); }
+    .connection-card .conn-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+    .connection-card .conn-insight { color: var(--gray); font-size: .88rem; line-height: 1.55; margin-bottom:10px; }
+    .connection-card .conn-question { color: var(--coral-light); font-size: .9rem; font-weight: 600; font-style: italic; }
+
+    .wildcard-card {
+      background: linear-gradient(135deg, rgba(108,99,255,.2), rgba(233,69,96,.15));
+      border: 1.5px solid rgba(108,99,255,.4);
+    }
+    .wildcard-card .conn-title::before { content: "🃏 "; }
+
+    .speech-bubble {
+      background: rgba(233,69,96,.12); border: 1.5px solid rgba(233,69,96,.3);
+      border-radius: 16px 16px 16px 4px; padding: 16px;
+      position: relative; margin-bottom: 4px;
+    }
+    .speech-bubble::before { content: "Say this:"; display: block; font-size: .7rem; letter-spacing: 1px; text-transform: uppercase; color: var(--coral); font-weight: 700; margin-bottom: 6px; }
+    .speech-bubble p { font-size: .95rem; line-height: 1.5; font-style: italic; color: var(--white); }
+
+    /* ── LEADERBOARD MODAL ───────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+      z-index: 100; align-items: flex-end; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--navy-light); border: 1.5px solid var(--card-border);
+      border-radius: 24px 24px 0 0; padding: 28px 20px 40px;
+      width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto;
+      animation: slideUp .3s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; }
+    .lb-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 0; border-bottom: 1px solid var(--card-border);
+    }
+    .lb-rank { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 800; width: 28px; text-align: center; color: var(--gray); }
+    .lb-rank.gold   { color: #ffd700; }
+    .lb-rank.silver { color: #c0c0c0; }
+    .lb-rank.bronze { color: #cd7f32; }
+    .lb-info { flex: 1; }
+    .lb-name { font-weight: 600; }
+    .lb-count { font-size: .8rem; color: var(--gray); }
+    .lb-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid var(--coral); display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif; font-size: .75rem; font-weight: 700; color: var(--coral);
+    }
+
+    /* ── ERROR TOAST ─────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #3d1a24; border: 1px solid var(--coral); border-radius: 12px;
+      padding: 12px 20px; font-size: .88rem; color: var(--coral-light);
+      transition: transform .3s ease; z-index: 200; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── SPINNER ─────────────────────────────────────────── */
+    .spinner {
+      width: 22px; height: 22px; border: 3px solid rgba(255,255,255,.2);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin .7s linear infinite; display: inline-block; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── LOADING OVERLAY ─────────────────────────────────── */
+    .loading-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(26,26,46,.92); z-index: 150;
+      flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+      text-align: center;
+    }
+    .loading-overlay.open { display: flex; }
+    .loading-overlay .big-spinner {
+      width: 56px; height: 56px; border-width: 5px;
+    }
+    .loading-overlay p { color: var(--gray); font-size: 1rem; max-width: 260px; line-height: 1.5; }
+    .loading-overlay h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+
+<!-- Animated blobs (screen 1 bg) -->
+<div class="blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<!-- ── SCREEN 1: LANDING ──────────────────────────────────── -->
+<div id="s1" class="screen active">
+  <h1 class="logo">Big Talk</h1>
+  <p class="tagline">When small talk ends, Big Talk starts.</p>
+  <div class="landing-form">
+    <input id="roomInput" type="text" placeholder="ROOM CODE (e.g. CS577)" maxlength="24" autocomplete="off" />
+    <button class="btn" onclick="enterRoom()">Enter Room →</button>
+    <p class="hint">Enter the same code as your group, lecture, or table.</p>
+  </div>
+</div>
+
+<!-- ── SCREEN 2: PROFILE CREATION ─────────────────────────── -->
+<div id="s2" class="screen">
+  <div class="s2-header">
+    <div class="room-badge" id="s2RoomBadge"></div>
+    <h1 style="margin-top:12px">Your Profile</h1>
+    <p>Fill this out — it's not a form, it's your vibe.</p>
+  </div>
+  <div class="scroll-form">
+    <div class="field"><label>Your Name</label><input id="pName" type="text" placeholder="e.g. Alex" /></div>
+    <div class="field"><label>Top 3 Anime</label><input id="pAnime" type="text" placeholder="e.g. Attack on Titan, Spy x Family, Demon Slayer" /></div>
+    <div class="field"><label>Top 3 Games</label><input id="pGames" type="text" placeholder="e.g. Elden Ring, Minecraft, Celeste" /></div>
+    <div class="field"><label>Top 3 Shows / Movies</label><input id="pShows" type="text" placeholder="e.g. Severance, Interstellar, The Bear" /></div>
+    <div class="field"><label>Your Hottest Take</label><textarea id="pTake" rows="2" placeholder="e.g. Pineapple on pizza is actually fine"></textarea></div>
+    <div class="field"><label>Something Nobody Knows About You</label><textarea id="pSecret" rows="2" placeholder="e.g. I once drove across three states for a specific taco"></textarea></div>
+    <button class="btn" style="margin-top:8px;margin-bottom:24px" onclick="joinRoom()">Join Room 🚀</button>
+  </div>
+</div>
+
+<!-- ── SCREEN 3: ROOM VIEW ────────────────────────────────── -->
+<div id="s3" class="screen">
+  <div class="room-header">
+    <h1>Room</h1>
+    <div class="room-badge" id="s3RoomBadge"></div>
+  </div>
+  <div class="people-grid" id="peopleGrid"></div>
+  <div class="bottom-actions">
+    <button class="btn secondary" onclick="openLeaderboard()">Leaderboard 🏆</button>
+  </div>
+</div>
+
+<!-- ── SCREEN 4: MATCH REVEAL ─────────────────────────────── -->
+<div id="s4" class="screen">
+  <div class="match-header">
+    <div class="match-names" id="matchNames"></div>
+    <div class="vibe-score-wrap">
+      <div class="vibe-label">Vibe Match Score</div>
+      <div class="vibe-number" id="vibeNumber">0</div>
+    </div>
+  </div>
+  <div class="connections-list" id="connectionsList"></div>
+  <div style="margin-top:16px">
+    <button class="btn" onclick="showScreen('s3')">← Back to Room</button>
+  </div>
+</div>
+
+<!-- ── LEADERBOARD MODAL ───────────────────────────────────── -->
+<div class="modal-overlay" id="lbModal" onclick="closeLeaderboard(event)">
+  <div class="modal">
+    <div class="modal-title">🏆 Leaderboard</div>
+    <div id="lbList"></div>
+    <button class="btn secondary" style="margin-top:20px" onclick="closeLbModal()">Close</button>
+  </div>
+</div>
+
+<!-- ── LOADING OVERLAY ────────────────────────────────────── -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner big-spinner"></div>
+  <h2>Finding your Big Talk...</h2>
+  <p>Claude is looking for non-obvious connections between you two ✨</p>
+</div>
+
+<!-- ── TOAST ──────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── STATE ──────────────────────────────────────────────────
+  let state = {
+    roomCode: '',
+    myId: null,
+    myName: '',
+    pollInterval: null,
+    matchData: null,
+  };
+
+  // ── SCREEN MANAGEMENT ──────────────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ── TOAST ──────────────────────────────────────────────────
+  function showToast(msg, duration = 3000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
+
+  // ── LOADING ────────────────────────────────────────────────
+  function setLoading(on) {
+    document.getElementById('loadingOverlay').classList.toggle('open', on);
+  }
+
+  // ── SCREEN 1: ENTER ROOM ───────────────────────────────────
+  function enterRoom() {
+    const raw = document.getElementById('roomInput').value.trim().toUpperCase();
+    if (!raw) { showToast('Please enter a room code'); return; }
+    state.roomCode = raw;
+    document.getElementById('s2RoomBadge').textContent = raw;
+    showScreen('s2');
+  }
+
+  document.getElementById('roomInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') enterRoom();
+  });
+
+  // ── SCREEN 2: JOIN ROOM ────────────────────────────────────
+  async function joinRoom() {
+    const name   = document.getElementById('pName').value.trim();
+    const anime  = document.getElementById('pAnime').value.trim();
+    const games  = document.getElementById('pGames').value.trim();
+    const shows  = document.getElementById('pShows').value.trim();
+    const take   = document.getElementById('pTake').value.trim();
+    const secret = document.getElementById('pSecret').value.trim();
+
+    if (!name)   { showToast('Add your name first!'); return; }
+    if (!anime && !games && !shows) { showToast('Fill in at least one interest'); return; }
+
+    const payload = {
+      room_code: state.roomCode,
+      name,
+      anime:  anime.split(',').map(s => s.trim()).filter(Boolean),
+      games:  games.split(',').map(s => s.trim()).filter(Boolean),
+      shows:  shows.split(',').map(s => s.trim()).filter(Boolean),
+      hot_take: take,
+      secret,
+    };
+
+    try {
+      setLoading(true);
+      const res = await fetch('/api/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      state.myId   = data.id;
+      state.myName = name;
+      document.getElementById('s3RoomBadge').textContent = state.roomCode;
+      setLoading(false);
+      showScreen('s3');
+      startPolling();
+    } catch (err) {
+      setLoading(false);
+      showToast('Could not join room. Is the server running?');
+      console.error(err);
+    }
+  }
+
+  // ── SCREEN 3: ROOM POLLING ─────────────────────────────────
+  function startPolling() {
+    renderRoom();
+    if (state.pollInterval) clearInterval(state.pollInterval);
+    state.pollInterval = setInterval(renderRoom, 3000);
+  }
+
+  async function renderRoom() {
+    try {
+      const res = await fetch(`/api/room/${state.roomCode}`);
+      if (!res.ok) return;
+      const people = await res.json();
+      const grid = document.getElementById('peopleGrid');
+      grid.innerHTML = '';
+
+      // Sort: me first
+      const sorted = [...people].sort((a, b) => {
+        if (a.id === state.myId) return -1;
+        if (b.id === state.myId) return 1;
+        return 0;
+      });
+
+      sorted.forEach(person => {
+        const isMe = person.id === state.myId;
+        const card = document.createElement('div');
+        card.className = 'person-card' + (isMe ? ' mine' : '');
+
+        const interests = [
+          ...(person.anime  || []),
+          ...(person.games  || []),
+          ...(person.shows  || []),
+        ];
+
+        card.innerHTML = `
+          <div class="card-name">
+            ${escHtml(person.name)}
+            ${isMe ? '<span class="you-tag">YOU</span>' : ''}
+          </div>
+          <div class="card-chips">
+            ${interests.slice(0, 6).map(i => `<span class="chip">${escHtml(i)}</span>`).join('')}
+          </div>
+        `;
+
+        if (!isMe) {
+          card.addEventListener('click', () => triggerMatch(person.id, person.name));
+        }
+        grid.appendChild(card);
+      });
+    } catch (err) {
+      console.error('Poll error', err);
+    }
+  }
+
+  // ── SCREEN 3 → 4: MATCH ───────────────────────────────────
+  async function triggerMatch(otherId, otherName) {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user1_id: state.myId, user2_id: otherId }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setLoading(false);
+      showMatchReveal(data, otherName);
+    } catch (err) {
+      setLoading(false);
+      showToast('Match failed — is the server running?');
+      console.error(err);
+    }
+  }
+
+  // ── SCREEN 4: REVEAL ──────────────────────────────────────
+  function showMatchReveal(data, otherName) {
+    // Names
+    document.getElementById('matchNames').innerHTML =
+      `<span>${escHtml(state.myName)}</span> &amp; <span>${escHtml(otherName)}</span>`;
+
+    // Vibe score count-up
+    const target = data.vibe_match_score ?? 0;
+    const numEl  = document.getElementById('vibeNumber');
+    numEl.textContent = '0';
+    let current = 0;
+    const step = Math.ceil(target / 40);
+    const timer = setInterval(() => {
+      current = Math.min(current + step, target);
+      numEl.textContent = current;
+      if (current >= target) clearInterval(timer);
+    }, 35);
+
+    // Connection cards
+    const list = document.getElementById('connectionsList');
+    list.innerHTML = '';
+
+    const connections = data.connections ?? [];
+    connections.forEach((conn, i) => {
+      const card = document.createElement('div');
+      card.className = 'connection-card';
+      card.innerHTML = `
+        <div class="conn-title">${escHtml(conn.title || 'Connection')}</div>
+        <div class="conn-insight">${escHtml(conn.insight || '')}</div>
+        <div class="conn-question">"${escHtml(conn.big_talk_question || '')}"</div>
+      `;
+      list.appendChild(card);
+      setTimeout(() => card.classList.add('visible'), 200 + i * 280);
+    });
+
+    // Wild card
+    if (data.wild_card) {
+      const wc = document.createElement('div');
+      wc.className = 'connection-card wildcard-card';
+      wc.innerHTML = `
+        <div class="conn-title">Wild Card</div>
+        <div class="conn-insight">${escHtml(data.wild_card)}</div>
+      `;
+      list.appendChild(wc);
+      setTimeout(() => wc.classList.add('visible'), 200 + connections.length * 280);
+    }
+
+    // Opening line
+    if (data.opening_line) {
+      const bubble = document.createElement('div');
+      bubble.className = 'connection-card';
+      bubble.innerHTML = `
+        <div class="speech-bubble"><p>${escHtml(data.opening_line)}</p></div>
+      `;
+      list.appendChild(bubble);
+      setTimeout(() => bubble.classList.add('visible'), 200 + (connections.length + 1) * 280);
+    }
+
+    showScreen('s4');
+  }
+
+  // ── LEADERBOARD ────────────────────────────────────────────
+  async function openLeaderboard() {
+    try {
+      const res = await fetch(`/api/leaderboard/${state.roomCode}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      renderLeaderboard(data);
+      document.getElementById('lbModal').classList.add('open');
+    } catch {
+      showToast('Could not load leaderboard');
+    }
+  }
+
+  function renderLeaderboard(entries) {
+    const rankClasses = ['gold', 'silver', 'bronze'];
+    const list = document.getElementById('lbList');
+    list.innerHTML = entries.map((e, i) => `
+      <div class="lb-row">
+        <div class="lb-rank ${rankClasses[i] || ''}">${i + 1}</div>
+        <div class="lb-info">
+          <div class="lb-name">${escHtml(e.name)}</div>
+          <div class="lb-count">${e.match_count} connection${e.match_count !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="lb-circle">${e.match_count}</div>
+      </div>
+    `).join('');
+  }
+
+  function closeLeaderboard(e) {
+    if (e.target === document.getElementById('lbModal')) closeLbModal();
+  }
+  function closeLbModal() {
+    document.getElementById('lbModal').classList.remove('open');
+  }
+
+  // ── UTILS ──────────────────────────────────────────────────
+  function escHtml(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+</script>
+</body>
+</html>
