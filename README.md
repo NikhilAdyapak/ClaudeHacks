@@ -69,3 +69,7 @@ python3 demo_profiles.py http://192.168.1.X:8000
 
 ## Team
 Built in a hackathon sprint — Person 1 (backend), Person 2 (frontend), Person 3 (demo + pitch).
+
+---
+
+Built by Nikhil Adyapak · [Portfolio](https://nikhiladyapak.github.io/) · [LinkedIn](https://www.linkedin.com/in/nikhil-adyapak)
